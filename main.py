@@ -20,6 +20,22 @@ detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 """
 
+import numpy as np
+import cv2
+
+from feature_extractor import FeatureExtractor
+from vehicle_classifier import VehicleClassifier
+
+
+def detect_vehicles(img, feature_extractor, classifier):
+    """
+    detect vehicles on the given image
+
+    :param img: given image
+    :return: list of bounding boxes
+    """
+    pass
+
 
 def main():
     pass
