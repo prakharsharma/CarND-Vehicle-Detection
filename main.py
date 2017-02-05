@@ -32,6 +32,9 @@ def detect_vehicles(img, feature_extractor, classifier):
     detect vehicles on the given image
 
     :param img: given image
+    :param feature_extractor: extractor
+    :param classifier: classifier
+
     :return: list of bounding boxes
     """
     pass

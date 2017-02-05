@@ -17,6 +17,14 @@ from skimage.feature import hog
 from scipy.ndimage.measurements import label
 
 
+def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+    """draw bounding boxes on the image"""
+    draw_img = np.copy(img)
+    for bbox in bboxes:
+        cv2.rectangle(draw_img, bbox[0], bbox[1], color, thick)
+    return draw_img
+
+
 def read_image(fname):
     """reads in image from file system"""
     return cv2.imread(fname)
