@@ -23,11 +23,15 @@ detections frame by frame to reject outliers and follow detected vehicles.
 import numpy as np
 import cv2
 
+import config
+
+import utils
+
 from feature_extractor import FeatureExtractor
 from vehicle_classifier import VehicleClassifier
 
 
-def detect_vehicles(img, feature_extractor, classifier):
+def detect_vehicles(img, classifier, draw_bbox=False):
     """
     detect vehicles on the given image
 
@@ -37,11 +41,45 @@ def detect_vehicles(img, feature_extractor, classifier):
 
     :return: list of bounding boxes
     """
-    pass
+
+    h, w = img.shape[:2]
+    windows = utils.slide_window(
+        img,
+        y_start_stop=[h/2, h]
+    )
+    print("searching for cars in {} windows in image".format(len(windows)))
+
+    car_windows = utils.search_windows(
+        img,
+        windows,
+        classifier.model,
+        classifier.scaler,
+        color_space=config.color_space,
+        spatial_size=config.spatial_size,
+        hist_bins=config.hist_bins,
+        hist_range=config.hist_range,
+        orient=config.orient,
+        pix_per_cell=config.pix_per_cell,
+        cell_per_block=config.cell_per_block,
+        hog_channel=config.hog_channel,
+        spatial_feat=config.spatial_feat,
+        hist_feat=config.hist_feat,
+        hog_feat=config.hog_feat
+    )
+    print("found car in {} windows".format(len(car_windows)))
+
+    if draw_bbox:
+        # TODO: draw detected bboxes on the image and save the image
+        pass
 
 
 def main():
-    pass
+    classifier = VehicleClassifier()
+    classifier.load_model()
+
+    images = []
+    for img in images:
+        detect_vehicles(img, classifier)
 
 
 if __name__ == "__main__":

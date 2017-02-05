@@ -42,6 +42,9 @@ hist_feat = True
 # number of histogram bins
 hist_bins = 32
 
+# histogram range
+hist_range = (0, 256)
+
 # number of orientations for HOG featurs
 orient = 9
 

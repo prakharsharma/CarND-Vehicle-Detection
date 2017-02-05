@@ -9,7 +9,7 @@ import glob
 
 import numpy as np
 
-from sklearn.externals import joblib
+import pickle
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
@@ -48,6 +48,7 @@ class VehicleClassifier(object):
 
     def __init__(self):
         self.model = None
+        self.scaler = None
 
     def build_model(self):
         """builds a classifier model"""
@@ -57,12 +58,20 @@ class VehicleClassifier(object):
     def save_model(self):
         """pickles the model to file system"""
 
-        joblib.dump(self.model, config.model_path)
+        pickle.dump(
+            {
+                'classifier': self.model,
+                'scaler': self.scaler
+            },
+            config.model_path
+        )
 
     def load_model(self):
         """loads an already trained model"""
 
-        self.model = joblib.load(config.model_path)
+        d = pickle.load(config.model_path)
+        self.model = d['classifier']
+        self.scaler = d['scaler']
 
     def train(self, data):
         """trains the model"""
@@ -106,8 +115,9 @@ class VehicleClassifier(object):
         X = np.vstack((car_features, not_car_features)).astype(np.float64)
 
         # Normalize the data
-        X_scaler = StandardScaler().fit(X)
-        scaled_X = X_scaler.transform(X)
+        self.scaler = StandardScaler()
+        self.scaler = self.scaler.fit(X)
+        scaled_X = self.scaler.transform(X)
 
         # Define the labels vector
         y = np.hstack(
