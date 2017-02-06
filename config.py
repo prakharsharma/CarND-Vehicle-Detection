@@ -79,3 +79,9 @@ max_window_size = 300
 
 # window step size
 step_size_for_window = 30
+
+# video lookback
+video_lookback_frame_count = 5
+
+# video heatmap threshold
+video_heatmap_threshold = 4
