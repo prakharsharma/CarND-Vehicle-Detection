@@ -91,13 +91,10 @@ def main():
         fname = parts[-1]
 
         image = detect_vehicles(img, classifier)
-        image.get_drawn_detections(diagnostic_mode=True)
-
-        plt.imsave('{}/{}'.format(config.output_dir, fname),
-                   utils.convert_color(image.drawn_vehicle_detections))
-
         save_diagnostic_plot(image, '{}/diagnostic-{}'.format(
             config.output_dir, fname))
+        plt.imsave('{}/{}'.format(config.output_dir, fname),
+                   utils.convert_color(image.drawn_vehicle_detections))
 
     # process video
     detect_in_video('./test_video.mp4', classifier)
