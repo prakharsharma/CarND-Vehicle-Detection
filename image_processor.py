@@ -47,14 +47,11 @@ class Image(object):
         self.drawn_vehicle_detections = utils.draw_labeled_bboxes(
             self.original, labels)
 
-        # if diagnostic_mode:
-        #     save_diagnostic_plot(image)
-
 
 def save_diagnostic_plot(image, fname):
     """draws diagnostic plot"""
 
-    image.get_drawn_detections()
+    image.get_drawn_detections(diagnostic_mode=True)
 
     nrows = 5
     f, axarr = plt.subplots(nrows, 1, figsize=(24, 24))
