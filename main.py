@@ -22,13 +22,14 @@ detections frame by frame to reject outliers and follow detected vehicles.
 
 import cv2
 import glob
+import time
 
 import numpy as np
 
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 
-import time
+from moviepy.editor import VideoFileClip
 
 import config
 
@@ -136,6 +137,56 @@ def detect_vehicles(img, classifier, vid_mode=False, fname=None):
     return final_detection
 
 
+class VideoProcessor(object):
+
+    def __init__(self, classifier):
+        self.classifier = classifier
+        self.n_frames = 0
+        self.time_per_frame = []
+
+
+def process_video_frame(processor):
+
+    def _process_frame(frame):
+        t0 = time.time()
+        retVal = detect_vehicles(frame, processor.classifier, vid_mode=True)
+        t1 = time.time()
+        processor.time_per_frame.append(t1-t0)
+        processor.n_frames += 1
+        return retVal
+
+    return _process_frame
+
+
+def detect_in_video(vid_file, classifier):
+    """detect vehicles in a video stream"""
+
+    parts = list(filter(None, vid_file.split('/')))
+    name = parts[-1]
+    out_fspath = '{}/{}'.format(config.output_dir, name)
+
+    processor = VideoProcessor(classifier)
+
+    clip = VideoFileClip(vid_file, audio=False)
+    t0 = time.time()
+    out_clip = clip.fl_image(process_video_frame(processor))
+    out_clip.write_videofile(
+        out_fspath,
+        audio=False
+    )
+    t1 = time.time()
+    timimg_info = np.asarray(processor.time_per_frame, dtype=np.float32)
+    print(
+        "Processed {} frames in total {:.2f} seconds, with {:.2f} fps and "
+        "{:.2f} seconds in mean to process a frame".format(
+            processor.n_frames,
+            t1 - t0,
+            processor.n_frames/(t1 - t0),
+            np.mean(timimg_info)
+        )
+    )
+
+
 def main():
     classifier = VehicleClassifier()
     classifier.load()
@@ -146,6 +197,7 @@ def main():
         detect_vehicles(img, classifier, vid_mode=False, fname=None)
 
     # process video
+    detect_in_video('./test_video.mp4', classifier)
 
 
 if __name__ == "__main__":
