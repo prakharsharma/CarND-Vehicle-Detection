@@ -4,11 +4,17 @@
 configuration
 """
 
+# dump debug info
+debug = True
+
+# output dir
+output_dir = './output_images'
+
 # data params
 
 # dir that holds labeled data for vehicles
 # vehicle_data = './labeled-data/small/vehicles_smallset'
-vehicle_data = './labeled-data/full/vehicles'
+vehicles_data = './labeled-data/full/vehicles'
 
 # dir that hold labeled data for non-vehicles
 # non_vehicles_data = './labeled-data/small/non-vehicles_smallset'
@@ -59,3 +65,6 @@ hog_channel = 0
 
 # use HOG features
 hog_feat = True
+
+# heatmap threshold
+heatmap_threshold = 2

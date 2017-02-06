@@ -16,6 +16,8 @@ from sklearn.svm import LinearSVC
 
 import config
 
+from feature_extractor import FeatureExtractor
+
 
 class Dataset(object):
 
@@ -27,7 +29,7 @@ class Dataset(object):
 class ClassificationData(object):
 
     def __init__(self):
-        self.training_data = None
+        self.train_data = None
         self.test_data = None
         self.validation_data = None
 
@@ -35,7 +37,7 @@ class ClassificationData(object):
         """collect stats for classification data"""
 
         d = {
-            'n_training_samples': len(self.training_data.X)
+            'n_training_samples': len(self.train_data.X)
         }
         if self.test_data:
             d['n_test_samples'] = len(self.test_data.X)
@@ -46,67 +48,87 @@ class ClassificationData(object):
 
 class VehicleClassifier(object):
 
-    def __init__(self):
+    def __init__(self, feature_extractor=None):
         self.model = None
         self.scaler = None
+        if feature_extractor:
+            self.feature_extractor = feature_extractor
+        else:
+            self.feature_extractor = FeatureExtractor.get_feature_extractor()
 
     def build_model(self):
         """builds a classifier model"""
 
         self.model = LinearSVC()
+        self.scaler = StandardScaler()
 
-    def save_model(self):
+    def save(self, fname=None):
         """pickles the model to file system"""
 
-        pickle.dump(
-            {
-                'classifier': self.model,
-                'scaler': self.scaler
-            },
-            config.model_path
-        )
+        fname = fname or config.model_path
+        with open(fname, 'wb') as f:
+            pickle.dump(
+                {
+                    'classifier': self.model,
+                    'scaler': self.scaler
+                },
+                f
+            )
 
-    def load_model(self):
+    def load(self, fname=None):
         """loads an already trained model"""
 
-        d = pickle.load(config.model_path)
-        self.model = d['classifier']
-        self.scaler = d['scaler']
+        fname = fname or config.model_path
+        with open(fname, 'rb') as f:
+            d = pickle.load(f)
+            self.model = d['classifier']
+            self.scaler = d['scaler']
 
     def train(self, data):
         """trains the model"""
 
         t0 = time.time()
-        self.model.fit(data.X, data.y)
+        self.model.fit(data.train_data.X, data.train_data.y)
         t1 = time.time()
 
         print("{:.2f} seconds to train the model".format(t1-t0))
 
-    def test(self, data):
-        """tests the model on test set"""
+        if data.test_data:
+            t0 = time.time()
+            score = self.model.score(data.test_data.X, data.test_data.y)
+            t1 = time.time()
 
-        t0 = time.time()
-        score = self.model.score(data.X, data.y)
-        t1 = time.time()
+            print("{:.2f} seconds to test the model, accuracy: {:.4f}".format(
+                t1 - t0, score
+            ))
 
-        print("{:.2f} seconds to test the model, accuracy: {:.4f}".format(
-            t1-t0, score
-        ))
+    # def test(self, data):
+    #     """tests the model on test set"""
+    #
+    #     t0 = time.time()
+    #     score = self.model.score(data.X, data.y)
+    #     t1 = time.time()
+    #
+    #     print("{:.2f} seconds to test the model, accuracy: {:.4f}".format(
+    #         t1-t0, score
+    #     ))
 
     def classify(self, X):
         """makes prediction using the trained model"""
 
         return self.model.predict(X)
 
-    def collect_data(self, feature_extractor):
+    def prepare_training_data(self, vehicles_data=None, non_vehicles_data=None):
         """collects data and splits it up on training/test/cross-val set"""
 
-        car_files = self.get_image_files(config.vehicle_data)
-        car_features = feature_extractor.extract_features(car_files)
+        car_files = self.get_image_files(vehicles_data or config.vehicles_data)
+        car_features = self.feature_extractor.extract_features(car_files)
         print("n_car_samples: {}".format(len(car_features)))
 
-        not_car_files = self.get_image_files(config.non_vehicles_data)
-        not_car_features = feature_extractor.extract_features(not_car_files)
+        not_car_files = self.get_image_files(
+            non_vehicles_data or config.non_vehicles_data)
+        not_car_features = self.feature_extractor.extract_features(
+            not_car_files)
         print("n_not_car_samples: {}".format(len(not_car_features)))
 
         print("n_features: {}".format(len(car_features[0])))
@@ -115,7 +137,6 @@ class VehicleClassifier(object):
         X = np.vstack((car_features, not_car_features)).astype(np.float64)
 
         # Normalize the data
-        self.scaler = StandardScaler()
         self.scaler = self.scaler.fit(X)
         scaled_X = self.scaler.transform(X)
 
@@ -133,7 +154,7 @@ class VehicleClassifier(object):
             test_size=config.test_train_ratio,
             random_state=rand_state
         )
-        data.training_data = Dataset(X_train, y_train)
+        data.train_data = Dataset(X_train, y_train)
 
         if not config.validation_test_ratio:
             data.test_data = Dataset(X_test, y_test)
@@ -146,7 +167,25 @@ class VehicleClassifier(object):
             data.validation_data = Dataset(X_val, y_val)
             data.test_data = Dataset(X_test, y_test)
 
+        print("classification data stats: {}".format(data.stats()))
+
         return data
+
+    def predict(self, image_list):
+        """makes prediction for the given list of images/files"""
+
+        features = self.feature_extractor.extract_features(image_list)
+        print('n_samples: {}'.format(len(features)))
+        print('n_features: {}'.format(len(features[0])))
+
+        X = np.vstack((features, )).astype(np.float64)
+        scaled_X = self.scaler.transform(X)
+
+        t0 = time.time()
+        prediction = self.model.predict(scaled_X)
+        t1 = time.time()
+
+        print('prediction: {} in {:.2f} seconds'.format(prediction, t1-t0))
 
     @classmethod
     def get_image_files(cls, base_path):
@@ -165,14 +204,12 @@ class VehicleClassifier(object):
 
 
 def main():
-    from feature_extractor import FeatureExtractor
     feature_extractor = FeatureExtractor.get_feature_extractor()
-    classifier = VehicleClassifier()
-    data = classifier.collect_data(feature_extractor)
+    classifier = VehicleClassifier(feature_extractor)
     classifier.build_model()
-    classifier.train(data.training_data)
-    classifier.test(data.test_data)
-    classifier.save_model()
+    data = classifier.prepare_training_data()
+    classifier.train(data)
+    classifier.save()
 
 
 if __name__ == "__main__":

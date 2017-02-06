@@ -17,11 +17,20 @@ from skimage.feature import hog
 from scipy.ndimage.measurements import label
 
 
-def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6):
+to_int_pair = lambda x: (int(x[0]), int(x[1]))
+
+
+def draw_boxes(img, bboxes, color=(0, 0, 255), thick=6, in_place=False):
     """draw bounding boxes on the image"""
-    draw_img = np.copy(img)
+
+    if in_place:
+        draw_img = img
+    else:
+        draw_img = np.copy(img)
+
     for bbox in bboxes:
-        cv2.rectangle(draw_img, bbox[0], bbox[1], color, thick)
+        cv2.rectangle(draw_img, to_int_pair(bbox[0]), to_int_pair(bbox[1]),
+                      color, thick)
     return draw_img
 
 
@@ -34,13 +43,13 @@ def convert_color(img, color_space='RGB'):
     if color_space == 'RGB':
         color = cv2.COLOR_BGR2RGB
     elif color_space == 'LUV':
-        color = cv2.COLOR_RGB2LUV
+        color = cv2.COLOR_BGR2LUV
     elif color_space == 'HLS':
-        color = cv2.COLOR_RGB2HLS
+        color = cv2.COLOR_BGR2HLS
     elif color_space == 'YUV':
-        color = cv2.COLOR_RGB2YUV
+        color = cv2.COLOR_BGR2YUV
     elif color_space == 'YCrCb':
-        color = cv2.COLOR_RGB2YCrCb
+        color = cv2.COLOR_BGR2YCrCb
     else:
         raise ValueError
     return cv2.cvtColor(img, color)/255
@@ -244,6 +253,8 @@ def search_windows(img, windows, clf, scaler, color_space='RGB',
     # 2) Iterate over all windows in the list
     for window in windows:
 
+        window = (to_int_pair(window[0]), to_int_pair(window[1]))
+
         # 3) Extract the test window from original image
         test_img = cv2.resize(
             img[window[0][1]:window[1][1], window[0][0]:window[1][0]],
@@ -284,15 +295,21 @@ def add_heat(heatmap, bbox_list):
 
     for box in bbox_list:
         # Add += 1 for all pixels inside each bbox
+        box = (to_int_pair(box[0]), to_int_pair(box[1]))
         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
     return heatmap
 
 
-def apply_threshold(heatmap, threshold):
+def apply_threshold(heatmap, threshold, in_place=False):
     """thresholds the heatmap"""
 
-    heatmap[heatmap <= threshold] = 0
-    return heatmap
+    if in_place:
+        heatmap_img = heatmap
+    else:
+        heatmap_img = np.copy(heatmap)
+
+    heatmap_img[heatmap_img <= threshold] = 0
+    return heatmap_img
 
 
 def create_labels(heatmap):
@@ -301,8 +318,13 @@ def create_labels(heatmap):
     return label(heatmap)
 
 
-def draw_labeled_bboxes(img, labels):
+def draw_labeled_bboxes(img, labels, in_place=False):
     """draws clean boxes around final detections"""
+
+    if in_place:
+        draw_img = img
+    else:
+        draw_img = np.copy(img)
 
     for car_number in range(1, labels[1] + 1):
         # Find pixels with each car_number label value
@@ -314,6 +336,6 @@ def draw_labeled_bboxes(img, labels):
         bbox = ((np.min(nonzerox), np.min(nonzeroy)),
                 (np.max(nonzerox), np.max(nonzeroy)))
         # Draw the box on the image
-        cv2.rectangle(img, bbox[0], bbox[1], (0, 0, 255), 6)
-    # Return the image
-    return img
+        cv2.rectangle(draw_img, bbox[0], bbox[1], (0, 0, 255), 6)
+
+    return draw_img
