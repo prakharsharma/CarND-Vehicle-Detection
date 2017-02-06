@@ -68,3 +68,14 @@ hog_feat = True
 
 # heatmap threshold
 heatmap_threshold = 2
+
+# sliding window params
+
+# min window size
+min_window_size = 32
+
+# max window size
+max_window_size = 300
+
+# window step size
+step_size_for_window = 30

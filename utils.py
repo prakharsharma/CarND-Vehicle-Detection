@@ -203,7 +203,8 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
 # window size (x and y dimensions),
 # and overlap fraction (for both x and y)
 def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
-                 xy_window=(64, 64), xy_overlap=(0.5, 0.5)):
+                 min_size=64, max_size=64, step_size=100,
+                 xy_overlap=(0.5, 0.5)):
 
     if img is not None:
         h, w = img.shape[:2]
@@ -219,21 +220,28 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None],
             y_start_stop[1] = h
 
     window_list = []
+    window_size = min_size
 
-    x_incr = int(xy_window[0] * xy_overlap[0])
-    y_incr = int(xy_window[1] * xy_overlap[1])
+    while window_size <= max_size:
 
-    y_iter = y_start_stop[0]
-    while y_iter + xy_window[1] <= y_start_stop[1]:
+        xy_window = (window_size, window_size)
 
-        x_iter = x_start_stop[0]
-        while x_iter + xy_window[0] <= x_start_stop[1]:
-            top_left = (x_iter, y_iter)
-            bottom_right = (x_iter + xy_window[0], y_iter + xy_window[1])
-            window_list.append((top_left, bottom_right))
-            x_iter += x_incr
+        x_incr = int(xy_window[0] * xy_overlap[0])
+        y_incr = int(xy_window[1] * xy_overlap[1])
 
-        y_iter += y_incr
+        y_iter = y_start_stop[0]
+        while y_iter + xy_window[1] <= y_start_stop[1]:
+
+            x_iter = x_start_stop[0]
+            while x_iter + xy_window[0] <= x_start_stop[1]:
+                top_left = (x_iter, y_iter)
+                bottom_right = (x_iter + xy_window[0], y_iter + xy_window[1])
+                window_list.append((top_left, bottom_right))
+                x_iter += x_incr
+
+            y_iter += y_incr
+
+        window_size += step_size
 
     return window_list
 

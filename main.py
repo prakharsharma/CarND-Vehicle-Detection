@@ -85,7 +85,10 @@ def detect_vehicles(img, classifier, vid_mode=False, fname=None):
     h, w = img.shape[:2]
     windows = utils.slide_window(
         img,
-        y_start_stop=[h/2, h]
+        y_start_stop=[h/2, h],
+        min_size=config.min_window_size,
+        max_size=config.max_window_size,
+        step_size=config.step_size_for_window
     )
     print("searching for cars in {} windows in image".format(len(windows)))
 
