@@ -25,11 +25,14 @@ import time
 
 import numpy as np
 
+import matplotlib.pyplot as plt
+
 from moviepy.editor import VideoFileClip
 
 import config
+import utils
 
-from image_processor import detect_vehicles
+from image_processor import detect_vehicles, save_diagnostic_plot
 from vehicle_classifier import VehicleClassifier
 from video_processor import VideoProcessor
 
@@ -38,7 +41,8 @@ def process_video_frame(processor):
 
     def _process_frame(frame):
         t0 = time.time()
-        retVal = detect_vehicles(frame, processor.classifier, vid_mode=True)
+        image = detect_vehicles(frame, processor.classifier)
+        retVal = processor.process_frame(image)
         t1 = time.time()
         processor.time_per_frame.append(t1-t0)
         processor.n_frames += 1
@@ -83,7 +87,17 @@ def main():
     # process images
     images = glob.glob('./test_images/*.jpg')
     for img in images:
-        detect_vehicles(img, classifier, vid_mode=False, fname=None)
+        parts = list(filter(None, img.split('/')))
+        fname = parts[-1]
+
+        image = detect_vehicles(img, classifier)
+        image.get_drawn_detections(diagnostic_mode=True)
+
+        plt.imsave('{}/{}'.format(config.output_dir, fname),
+                   utils.convert_color(image.drawn_vehicle_detections))
+
+        save_diagnostic_plot(image, '{}/diagnostic-{}'.format(
+            config.output_dir, fname))
 
     # process video
     detect_in_video('./test_video.mp4', classifier)
