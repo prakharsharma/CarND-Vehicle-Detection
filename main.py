@@ -23,6 +23,8 @@ detections frame by frame to reject outliers and follow detected vehicles.
 import glob
 import time
 
+import cv2
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -38,15 +40,23 @@ from video_processor import VideoProcessor
 
 
 def process_video_frame(processor):
+    """processes video stream"""
 
     def _process_frame(frame):
+        """process single frame in video stream"""
+
         t0 = time.time()
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         image = detect_vehicles(frame, processor.classifier)
-        retVal = processor.process_frame(image)
+        processor.process_frame(image)
+
         t1 = time.time()
+
         processor.time_per_frame.append(t1-t0)
         processor.n_frames += 1
-        return retVal
+
+        return cv2.cvtColor(image.drawn_vehicle_detections, cv2.COLOR_BGR2RGB)
 
     return _process_frame
 
@@ -61,14 +71,19 @@ def detect_in_video(vid_file, classifier):
     processor = VideoProcessor(classifier)
 
     clip = VideoFileClip(vid_file, audio=False)
+    print("processing {}, fps: {}, duration: {}".format(
+        vid_file, clip.fps, clip.duration
+    ))
+
     t0 = time.time()
+
     out_clip = clip.fl_image(process_video_frame(processor))
-    out_clip.write_videofile(
-        out_fspath,
-        audio=False
-    )
+    out_clip.write_videofile(out_fspath, audio=False)
+
     t1 = time.time()
+
     timimg_info = np.asarray(processor.time_per_frame, dtype=np.float32)
+
     print(
         "Processed {} frames in total {:.2f} seconds, with {:.2f} fps and "
         "{:.2f} seconds in mean to process a frame".format(

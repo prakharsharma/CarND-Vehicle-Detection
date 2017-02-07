@@ -26,10 +26,11 @@ class Image(object):
         self.thresholded_heatmap = None
         self.drawn_vehicle_detections = None
 
-    def get_drawn_detections(self, diagnostic_mode=False):
+    def get_drawn_detections(self, diagnostic_mode=False, vid_mode=False):
         """returns image with bbox drawn around detected vehicles"""
 
-        if diagnostic_mode and self.drawn_all_detections is None:
+        if diagnostic_mode and not vid_mode and \
+                self.drawn_all_detections is None:
             self.drawn_all_detections = utils.draw_boxes(
                 self.original, self.hot_windows, color=(0, 0, 255), thick=6)
 
@@ -42,34 +43,43 @@ class Image(object):
             self.thresholded_heatmap = utils.apply_threshold(
                 self.heatmap, config.heatmap_threshold)
 
-        labels = utils.create_labels(self.thresholded_heatmap)
+        if self.drawn_vehicle_detections is None:
+            labels = utils.create_labels(self.thresholded_heatmap)
+            self.drawn_vehicle_detections = utils.draw_labeled_bboxes(
+                self.original, labels)
 
-        self.drawn_vehicle_detections = utils.draw_labeled_bboxes(
-            self.original, labels)
 
-
-def save_diagnostic_plot(image, fname):
+def save_diagnostic_plot(image, fname, vid_mode=False):
     """draws diagnostic plot"""
 
-    image.get_drawn_detections(diagnostic_mode=True)
+    image.get_drawn_detections(diagnostic_mode=True, vid_mode=vid_mode)
 
     nrows = 5
+    if vid_mode:
+        nrows = 4
+
     f, axarr = plt.subplots(nrows, 1, figsize=(24, 24))
 
-    axarr[0].imshow(utils.convert_color(image.original))
-    axarr[0].set_title('Original image', fontsize=20)
+    i = 0
+    axarr[i].imshow(utils.convert_color(image.original))
+    axarr[i].set_title('Original image', fontsize=20)
 
-    axarr[1].imshow(utils.convert_color(image.drawn_all_detections))
-    axarr[1].set_title('All detected windows', fontsize=20)
+    if not vid_mode:
+        i += 1
+        axarr[i].imshow(utils.convert_color(image.drawn_all_detections))
+        axarr[i].set_title('All detected windows', fontsize=20)
 
-    axarr[2].imshow(image.heatmap, cmap='gray')
-    axarr[2].set_title('Heatmap', fontsize=20)
+    i += 1
+    axarr[1].imshow(image.heatmap, cmap='gray')
+    axarr[1].set_title('Heatmap', fontsize=20)
 
-    axarr[3].imshow(image.thresholded_heatmap, cmap='gray')
-    axarr[3].set_title('Thresholded heatmap', fontsize=20)
+    i += 1
+    axarr[i].imshow(image.thresholded_heatmap, cmap='gray')
+    axarr[i].set_title('Thresholded heatmap', fontsize=20)
 
-    axarr[4].imshow(utils.convert_color(image.drawn_vehicle_detections))
-    axarr[4].set_title('Detected cars', fontsize=20)
+    i += 1
+    axarr[i].imshow(utils.convert_color(image.drawn_vehicle_detections))
+    axarr[i].set_title('Detected cars', fontsize=20)
 
     f.subplots_adjust(left=0., right=1, top=0.9, bottom=0.2)
     f.savefig(fname)
