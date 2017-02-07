@@ -61,13 +61,13 @@ pix_per_cell = 8
 cell_per_block = 2
 
 # HOG channel
-hog_channel = 0
+hog_channel = 'ALL'
 
 # use HOG features
 hog_feat = True
 
 # heatmap threshold
-heatmap_threshold = 2
+heatmap_threshold = 1
 
 # sliding window params
 
@@ -75,10 +75,12 @@ heatmap_threshold = 2
 min_window_size = 32
 
 # max window size
-max_window_size = 300
+# max_window_size = 300
+max_window_size = 200
 
 # window step size
 step_size_for_window = 30
+# step_size_for_window = 20
 
 # video lookback
 video_lookback_frame_count = 5

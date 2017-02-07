@@ -3,19 +3,16 @@
 """
 """
 
+import glob
+import pickle
 import time
 
-import glob
-
 import numpy as np
-
-import pickle
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 
 import config
-
 from feature_extractor import FeatureExtractor
 
 

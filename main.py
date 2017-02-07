@@ -24,16 +24,12 @@ import glob
 import time
 
 import cv2
-
-import numpy as np
-
 import matplotlib.pyplot as plt
-
+import numpy as np
 from moviepy.editor import VideoFileClip
 
 import config
 import utils
-
 from image_processor import detect_vehicles, save_diagnostic_plot
 from vehicle_classifier import VehicleClassifier
 from video_processor import VideoProcessor

@@ -9,13 +9,8 @@ detection lesson
 
 import cv2
 import numpy as np
-
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-
-from skimage.feature import hog
 from scipy.ndimage.measurements import label
-
+from skimage.feature import hog
 
 to_int_pair = lambda x: (int(x[0]), int(x[1]))
 
@@ -50,6 +45,8 @@ def convert_color(img, color_space='RGB'):
         color = cv2.COLOR_BGR2YUV
     elif color_space == 'YCrCb':
         color = cv2.COLOR_BGR2YCrCb
+    elif color_space == 'HSV':
+        color = cv2.COLOR_BGR2HSV
     else:
         raise ValueError
     return cv2.cvtColor(img, color)/255
@@ -190,9 +187,17 @@ def extract_features(imgs, color_space='RGB', spatial_size=(32, 32),
             raise ValueError('bad image: {}'.format(img))
 
         features.append(single_img_features(
-            img, color_space, spatial_size, hist_bins, orient,
-            pix_per_cell, cell_per_block, hog_channel, spatial_feat,
-            hist_feat, hog_feat
+            img,
+            color_space,
+            spatial_size,
+            hist_bins,
+            orient,
+            pix_per_cell,
+            cell_per_block,
+            hog_channel,
+            spatial_feat,
+            hist_feat,
+            hog_feat
         ))
 
     return features

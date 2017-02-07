@@ -4,14 +4,10 @@
 abstraction for image processor
 """
 
-import time
-
+import matplotlib.pyplot as plt
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 import config
-
 import utils
 
 
@@ -70,8 +66,8 @@ def save_diagnostic_plot(image, fname, vid_mode=False):
         axarr[i].set_title('All detected windows', fontsize=20)
 
     i += 1
-    axarr[1].imshow(image.heatmap, cmap='gray')
-    axarr[1].set_title('Heatmap', fontsize=20)
+    axarr[i].imshow(image.heatmap, cmap='gray')
+    axarr[i].set_title('Heatmap', fontsize=20)
 
     i += 1
     axarr[i].imshow(image.thresholded_heatmap, cmap='gray')
