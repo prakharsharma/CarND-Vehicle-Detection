@@ -29,6 +29,8 @@ Some example images for testing your pipeline on single frames are located in th
 [projectVideoOut]: https://youtu.be/NQ5feKnc66E "video result"
 [hogFeaturesExtractionFunc]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/utils.py#L77 "hog feature extraction"
 [linearSVMTrainFunc]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/vehicle_classifier.py#L84 "SVM train"
+[vehicleClassifier]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/vehicle_classifier.py#L46 "classifier"
+[featureExtractor]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/feature_extractor.py#L14 "feature extractor"
 [slidingWindowFunc]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/utils.py#L197 "sliding window"
 [detectVehiclesFunc]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/image_processor.py#L84 "detect vehicles func"
 [vidDuplicateDetectionAndFalsePositives]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/video_processor.py#L21 "false positives in video"
@@ -99,7 +101,13 @@ hog_channel = 'ALL'
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using a combination of spatial, color histogram and HOG features. Training is done by [`train`][linearSVMTrainFunc].
+I trained a linear SVM using a combination of spatial, color histogram and HOG features. Classifier is represented by
+ [`VehicleClassifier`][vehicleClassifier]. It does the following
+
+1. Creates a `LinearSVC` model,
+1. Collects training data and extracts features using [`FeatureExtractor`][featureExtractor],
+1. Normalizes data using `sklearn.preprocessing.StandardScaler`, and
+1. Trains the model at [`train`][linearSVMTrainFunc].
 
 ###Sliding Window Search
 
