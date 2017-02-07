@@ -80,7 +80,6 @@ max_window_size = 200
 
 # window step size
 step_size_for_window = 30
-# step_size_for_window = 20
 
 # video lookback
 video_lookback_frame_count = 5

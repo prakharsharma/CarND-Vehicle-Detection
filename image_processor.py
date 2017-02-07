@@ -93,9 +93,6 @@ def detect_vehicles(img, classifier):
     """
 
     if isinstance(img, str):  # this is a file
-        # fname = fname or img
-        # parts = list(filter(None, fname.split('/')))
-        # fname = parts[-1]
         img = utils.read_image(img)
     elif not isinstance(img, np.ndarray):
         raise ValueError('bad image: {}'.format(img))
@@ -131,28 +128,13 @@ def detect_vehicles(img, classifier):
 
     image = Image(img, hot_windows)
 
-    # window_img = utils.draw_boxes(img, hot_windows,
-    #                               color=(0, 0, 255), thick=6)
-    #
-    # heatmap_image = np.zeros_like(img[:, :, 0]).astype(np.float)
-    # heatmap = utils.add_heat(heatmap_image, hot_windows)
-    # thresholded_heatmap = utils.apply_threshold(heatmap,
-    #                                             config.heatmap_threshold)
-    # labels = utils.create_labels(thresholded_heatmap)
-    # final_detection = utils.draw_labeled_bboxes(img, labels)
-    #
-    # if not vid_mode and config.debug:
-    #     fname = fname or '{}.jpg'.format(str(int(time.time() * 1000)))
-    #     fname = '{}/{}'.format(config.output_dir, fname)
-    #     d = {
-    #         'original': img,
-    #         'all_windows': window_img,
-    #         'heatmap': heatmap,
-    #         'thresholded_heatmap': thresholded_heatmap,
-    #         'final_detection': final_detection
-    #     }
-    #     draw_diagnostic_plot(d, fname)
-    #
-    # return final_detection
-
     return image
+
+
+def detect_cars_in_image(img, classifier):
+    """provided end to end detection of cars in an image/frame"""
+
+    image = detect_vehicles(img, classifier)
+    image.get_drawn_detections()
+
+    return image.drawn_vehicle_detections
