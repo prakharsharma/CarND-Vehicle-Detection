@@ -99,8 +99,7 @@ hog_channel = 'ALL'
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using a combination of spatial, color histogram and HOG features. Training is done by [`train`][linearSVMTrainFunc],
- which is invoked by [`detect_vehicles`][detectVehiclesFunc]
+I trained a linear SVM using a combination of spatial, color histogram and HOG features. Training is done by [`train`][linearSVMTrainFunc].
 
 ###Sliding Window Search
 
