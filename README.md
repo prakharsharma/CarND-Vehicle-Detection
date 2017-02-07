@@ -153,7 +153,7 @@ Here's a [link to my video result](https://youtu.be/NQ5feKnc66E)
 1. Creates a heatmap using the hot windows in the current frame and past few frames,
 1. Thesholds the heatmap (to deal with duplicate detections and false positives),
 1. Identifies individual blobs in the heatmap using `scipy.ndimage.measurements.label()`, and
-1. Assumes each of the blog to correspond to a vehicle and then draws bounding boxes around the blobs.
+1. Assumes each of the blob to correspond to a vehicle and then draws bounding boxes around the blobs.
 
 Behavior of the function can be tuned using the following [configuration][config] parameters
 
@@ -176,10 +176,10 @@ techniques. The course material for this project was pretty good! I had to watch
  P4 had built some familiarity with computer vision techniques. That was definitely helpful. I am quite proud of what I have put together, but,
  there are quite a few areas of improvement: - 
 
-1. Detections in video are sometimes choppy - iron out these issues.
-1. Bounding box should fit more tightly around the cars. May be experiment with rectangular (not square) detection windows?
+1. Detections in video are sometimes choppy.
+1. Bounding box should fit more tightly around the cars.
 1. Faster performance on video.
-1. Better performance on challenge videos.
+1. Better detections on challenge videos.
 1. Hook up lane detection from P4 into a combined pipeline!
 
 Few things to try out for making the above improvements: - 
@@ -187,7 +187,8 @@ Few things to try out for making the above improvements: -
 1. Limit the number of candidate windows to look for detections (using a max number of windows).
 1. Perform classification across candidate windows in parallel to speed up performance.
 1. Compute HOG features for the whole image once rather than computing HOG features for small portions of the image.
-1. Using PCA or decision tree to find out which features are important and then just using the important features (performance improvement).
+1. Experiment with rectangular (not square) detection windows.
+1. Using PCA or decision tree to find out which features are important and then just using the important features.
 1. Fine tuning various hyper params, (may be even learning them)
     1. min and max size of windows,
     1. step size for increasing window size,
