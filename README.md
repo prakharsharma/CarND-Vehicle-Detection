@@ -39,6 +39,7 @@ Some example images for testing your pipeline on single frames are located in th
 [detectVehiclesInImageFunc]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/image_processor.py#L134 "detect vehicles"
 [videoProcessorClass]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/video_processor.py#L13 "video processor"
 [config]: https://github.com/prakharsharma/CarND-Vehicle-Detection/blob/master/config.py "config"
+[modelLink]: https://www.dropbox.com/s/07ji0ep1vjc5ex8/model.zip?dl=0 "model link"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/513/view) Points
 ###Here I will consider the rubric points individually and describe how I addressed each point in my implementation.
@@ -106,8 +107,11 @@ I trained a linear SVM using a combination of spatial, color histogram and HOG f
 
 1. Creates a `LinearSVC` model,
 1. Collects training data and extracts features using [`FeatureExtractor`][featureExtractor],
-1. Normalizes data using `sklearn.preprocessing.StandardScaler`, and
-1. Trains the model at [`train`][linearSVMTrainFunc].
+1. Normalizes data using `sklearn.preprocessing.StandardScaler`,
+1. Splits data into train/test set using `sklearn.model_selection.train_test_split`, and
+1. [`train`][linearSVMTrainFunc] and computes accuracy on test set.
+
+Model achieved an accuracy of `99.61%` on test set. Model parameters are available at [link][modelLink].
 
 ###Sliding Window Search
 
